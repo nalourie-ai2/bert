@@ -186,18 +186,15 @@ class CommonsenseQAProcessor(DataProcessor):
 
       question = tokenization.convert_to_unicode(line['question'])
 
-      permutation = np.random.permutation(5)
-
       answers = np.array([
         tokenization.convert_to_unicode(line['correct_answer']),
         tokenization.convert_to_unicode(line['distractor_0']),
         tokenization.convert_to_unicode(line['distractor_1']),
         tokenization.convert_to_unicode(line['distractor_2']),
         tokenization.convert_to_unicode(line['distractor_4'])
-      ])[permutation]
+      ])
 
-      # the label should be the index of '0' in permutation
-      label = np.argmin(permutation)
+      label = 0
 
       examples.append(
         InputExample(
