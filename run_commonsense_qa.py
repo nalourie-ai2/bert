@@ -38,6 +38,11 @@ flags.DEFINE_string(
     "output_dir", None,
     "The output directory where the model checkpoints will be written.")
 
+flags.DEFINE_string(
+  "split", None,
+  "The split you'd like to run on, either 'qtoken' or 'rand'.")
+
+
 ## Other parameters
 
 flags.DEFINE_string(
@@ -157,23 +162,44 @@ class DataProcessor(object):
 class CommonsenseQAProcessor(DataProcessor):
   """Processor for the CommonsenseQA data set."""
 
-  TRAIN_FILE_NAME = 'train.json'
-  DEV_FILE_NAME = 'dev.json'
-  TEST_FILE_NAME = 'test.json'
+  SPLIT_TO_NAME = {
+    'qtoken': 'qtoken_split_cand_dists',
+    'rand': 'rand_split_cand_dists'
+  }
+
+  TRAIN_FILE_NAME = 'train_{split_name}.json'
+  DEV_FILE_NAME = 'dev_{split_name}.json'
+  TEST_FILE_NAME = 'test_{split_name}.json'
+
+  def __init__(self, split):
+    if split not in self.SPLIT_TO_NAME.keys():
+      raise ValueError(
+        'split must be one of {", ".join(self.SPLIT_TO_NAME.keys())}.')
+
+    self.split = split
 
   def get_train_examples(self, data_dir):
+    train_file_name = self.TRAIN_FILE_NAME.format(
+      split_name=self.SPLIT_TO_NAME[self.split])
+
     return self._create_examples(
-      self._read_json(os.path.join(data_dir, self.TRAIN_FILE_NAME)),
+      self._read_json(os.path.join(data_dir, train_file_name)),
       'train')
 
   def get_dev_examples(self, data_dir):
+    dev_file_name = self.DEV_FILE_NAME.format(
+      split_name=self.SPLIT_TO_NAME[self.split])
+
     return self._create_examples(
-      self._read_json(os.path.join(data_dir, self.DEV_FILE_NAME)),
+      self._read_json(os.path.join(data_dir, dev_file_name)),
       'dev')
 
   def get_test_examples(self, data_dir):
+    test_file_name = self.TEST_FILE_NAME.format(
+      split_name=self.SPLIT_TO_NAME[self.split])
+
     return self._create_examples(
-      self._read_json(os.path.join(data_dir, self.TEST_FILE_NAME)),
+      self._read_json(os.path.join(data_dir, test_file_name)),
       'test')
 
   def get_labels(self):
@@ -620,7 +646,7 @@ def main(_):
 
   tf.gfile.MakeDirs(FLAGS.output_dir)
 
-  processor = CommonsenseQAProcessor()
+  processor = CommonsenseQAProcessor(split=FLAGS.split)
 
   label_list = processor.get_labels()
 
