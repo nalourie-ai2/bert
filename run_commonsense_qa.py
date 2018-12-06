@@ -217,7 +217,7 @@ class CommonsenseQAProcessor(DataProcessor):
         tokenization.convert_to_unicode(line['distractor_0']),
         tokenization.convert_to_unicode(line['distractor_1']),
         tokenization.convert_to_unicode(line['distractor_2']),
-        tokenization.convert_to_unicode(line['distractor_4'])
+        tokenization.convert_to_unicode(line['distractor_3'])
       ])
 
       label = 0
