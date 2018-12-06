@@ -329,13 +329,13 @@ def file_based_convert_examples_to_features(
     features = collections.OrderedDict()
     for i, (choice_token_ids, choice_segment_ids) in enumerate(
         zip(token_ids, segment_ids)):
-      input_ids = np.zeros(seq_length)
+      input_ids = np.zeros(max_seq_length)
       input_ids[:len(choice_token_ids)] = np.array(choice_token_ids)
 
-      input_mask = np.zeros(seq_length)
+      input_mask = np.zeros(max_seq_length)
       input_mask[:len(choice_token_ids)] = 1
 
-      segment_ids = np.zeros(seq_length)
+      segment_ids = np.zeros(max_seq_length)
       segment_ids[:len(choice_segment_ids)] = np.array(choice_segment_ids)
 
       features[f'input_ids{i}'] = tf.train.Feature(
@@ -706,9 +706,10 @@ def main(_):
     tf.logging.info("  Num examples = %d", len(train_examples))
     tf.logging.info("  Batch size = %d", FLAGS.train_batch_size)
     tf.logging.info("  Num steps = %d", num_train_steps)
+    tf.logging.info("  Longest training sequence = %d", train_seq_length)
     train_input_fn = file_based_input_fn_builder(
         input_file=train_file,
-        seq_length=train_seq_length,
+        seq_length=FLAGS.max_seq_length,
         is_training=True,
         drop_remainder=True)
     estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
@@ -722,6 +723,7 @@ def main(_):
     tf.logging.info("***** Running evaluation *****")
     tf.logging.info("  Num examples = %d", len(eval_examples))
     tf.logging.info("  Batch size = %d", FLAGS.eval_batch_size)
+    tf.logging.info("  Longest eval sequence = %d", eval_seq_length)
 
     # This tells the estimator to run through the entire set.
     eval_steps = None
@@ -735,7 +737,7 @@ def main(_):
     eval_drop_remainder = True if FLAGS.use_tpu else False
     eval_input_fn = file_based_input_fn_builder(
         input_file=eval_file,
-        seq_length=eval_seq_length,
+        seq_length=FLAGS.max_seq_length,
         is_training=False,
         drop_remainder=eval_drop_remainder)
 
@@ -759,6 +761,7 @@ def main(_):
     tf.logging.info("***** Running prediction*****")
     tf.logging.info("  Num examples = %d", len(predict_examples))
     tf.logging.info("  Batch size = %d", FLAGS.predict_batch_size)
+    tf.logging.info("  Longest predict sequence = %d", predict_seq_length)
 
     if FLAGS.use_tpu:
       # Warning: According to tpu_estimator.py Prediction on TPU is an
@@ -768,7 +771,7 @@ def main(_):
     predict_drop_remainder = True if FLAGS.use_tpu else False
     predict_input_fn = file_based_input_fn_builder(
         input_file=predict_file,
-        seq_length=predict_seq_length,
+        seq_length=FLAGS.max_seq_length,
         is_training=False,
         drop_remainder=predict_drop_remainder)
 
