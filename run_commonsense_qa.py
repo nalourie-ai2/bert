@@ -163,13 +163,14 @@ class CommonsenseQAProcessor(DataProcessor):
   """Processor for the CommonsenseQA data set."""
 
   SPLIT_TO_NAME = {
-    'qtoken': 'qtoken_split_cand_dists',
-    'rand': 'rand_split_cand_dists'
+    '': '',
+    'qtoken': '_qtoken_split_cand_dists',
+    'rand': '_rand_split_cand_dists'
   }
 
-  TRAIN_FILE_NAME = 'train_{split_name}.json'
-  DEV_FILE_NAME = 'dev_{split_name}.json'
-  TEST_FILE_NAME = 'test_{split_name}.json'
+  TRAIN_FILE_NAME = 'train{split_name}.json'
+  DEV_FILE_NAME = 'dev{split_name}.json'
+  TEST_FILE_NAME = 'test{split_name}.json'
 
   def __init__(self, split):
     if split not in self.SPLIT_TO_NAME.keys():
